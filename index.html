@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>三角洲 TTK计算器</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./assets/libs/chart.umd.min.js"></script>
+  <script src="./assets/libs/chartjs-plugin-datalabels.min.js"></script>
+</head>
+
+<body>
+  <div class="title-container">
+    <img src="./assets/title.png" alt="TTK计算器标题" class="title-image">
+    <h2>TTK计算器</h2>
+  </div>
+  
+  <div class="version-info">
+    <span class="update-date">
+      <span class="date-label">更新日期:</span>
+      <span class="date-value">2026/07/01</span>
+    </span>
+    <span class="version-log">
+      <a href="./assets/Version.txt" target="_blank" title="查看更新日志">
+        <span class="version-label">版本日志</span>
+      </a>
+    </span>
+    <span class="author">
+      <a href="https://space.bilibili.com/15094121" target="_blank" title="访问UP主B站页面">
+        <img src="./assets/bili.png" alt="B站" class="author-icon" width="16" height="16">
+        <span class="author-name">中毒的AI</span>
+      </a>
+    </span>
+    <span class="author">
+      <a href="https://space.bilibili.com/69673916" target="_blank" title="访问UP主B站页面">
+        <img src="./assets/bili.png" alt="B站" class="author-icon" width="16" height="16">
+        <span class="author-name">丨重华丨（专栏更新）</span>
+      </a>
+    </span>
+    <span class="url">
+      <a href="https://pan.baidu.com/s/1F9S_OEH7n2g6C7B6zSsSNA?pwd=azt3" target="_blank" title="访问下载地址">
+        <span class="author-name">下载地址</span>
+      </a>
+    </span>	
+  </div>
+  
+  <div class="control-group">
+    <label for="bulletLevel">子弹等级</label>
+    <select id="bulletLevel">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4" selected>4</option>
+      <option value="5">5</option>
+    </select>
+    <label for="healthValue">生命值</label>
+    <input type="number" id="healthValue" value="100" min="1" max="800">
+  </div>
+  
+  <div class="control-group">
+    <label for="armorLevel">护甲等级</label>
+    <select id="armorLevel">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4" selected>4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+    </select>
+    <label for="armorValue">护甲值</label>
+    <input type="number" id="armorValue" value="110" min="0" max="200">
+  </div>
+
+  <div class="control-group">
+    <label for="helmetLevel">头盔等级</label>
+    <select id="helmetLevel">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4" selected>4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+    </select>
+    <label for="helmetValue">头盔值</label>
+    <input type="number" id="helmetValue" value="48" min="0" max="100">
+  </div>
+  
+  <div class="control-group" id="distance-group">
+    <label for="distance">交战距离 (m)</label>
+    <input type="number" id="distance" value="30" min="0">
+  </div>
+   
+  <fieldset class="control-group">
+    <legend>击中部位概率</legend>
+    <div class="prob-item">
+      <label>头部:</label><input type="number" id="pHead" value="0.18" step="0.01" min="0" max="1">
+      <label>胸部:</label><input type="number" id="pChest" value="0.33" step="0.01" min="0" max="1">
+      <label>腹部:</label><input type="number" id="pStomach" value="0.19" step="0.01" min="0" max="1">
+      <label>四肢:</label><input type="number" id="pLimbs" value="0.3" step="0.01" min="0" max="1">
+    </div>
+    <div class="prob-actions">
+      <button id="avgHitProbBtn" type="button">平均击中概率模型</button>
+      <span class="prob-hint">一键填入：头 0.18 / 胸 0.33 / 腹 0.19 / 四肢 0.3 </span>
+    </div>
+  </fieldset>
+  
+  <div class="control-group">
+    <label for="triggerDelayEnable">扳机延迟</label>
+    <input type="checkbox" id="triggerDelayEnable" checked>
+    <label for="globalBarrelType">枪管类型:</label>
+    <select id="globalBarrelType">
+      <option value="none">无</option>
+      <option value="longest" selected>输出最高枪管</option>
+    </select>
+    <label for="hitRate">命中率:</label>
+    <input type="number" id="hitRate" value="0.85" min="0" max="1" step="0.01">
+  </div>
+
+  <div class="buttons-container">
+    <button id="calcBtn">生成TTK排行榜</button>
+    <button id="distChartBtn">生成TTK折线图</button>
+    <button id="dataEditorBtn" class="editor-btn">⚙ 编辑数据</button>
+    <button id="clearDataBtn" class="editor-btn" style="background:#c0392b">✖ 清除临时数据</button>
+    <button id="hideDmrBtn" class="editor-btn" style="background:#555" title="排除精确射手步枪（保留M14、SVCH）">🎯 隐藏射手步枪</button>
+    <div class="rank-filter-control">
+      <label for="rankFilterMode">排行筛选</label>
+      <select id="rankFilterMode">
+        <option value="none" selected>不启用</option>
+        <option value="keepTop">保留前</option>
+        <option value="trimBottom">剔除倒数</option>
+      </select>
+      <input type="number" id="keepTopCount" value="0" min="0" step="1" placeholder="前N" title="保留前N位">
+      <input type="number" id="trimBottomCount" value="0" min="0" step="1" placeholder="倒数N" title="剔除倒数N位">
+      <span class="rank-filter-hint">名</span>
+    </div>
+  </div>
+  
+  <div class="canvas-container">
+    <canvas id="ttkChart" width="800" height="400"></canvas>
+  </div>
+  
+  <div class="canvas-container">
+    <canvas id="distanceChart" width="800" height="400"></canvas>
+  </div>
+
+  <table id="attachmentTable">
+    <thead>
+      <tr>
+        <th>武器</th>
+        <th>类型</th>
+        <th>射速</th>
+        <th>初速</th>
+        <th>射程</th>
+        <th>基础伤害</th>
+        <th>护甲伤害</th>
+        <th>部位倍率</th>
+        <th>枪管</th>
+        <th>射速配件</th>
+        <th>枪口</th>
+        <th>子弹类型</th>
+        <th>命中率</th>
+        <th>枪口初速精校</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div id="weaponDataEditor" class="weapon-detail-modal hidden">
+    <div class="weapon-detail-backdrop" data-close="weapon-data-editor"></div>
+    <div class="weapon-data-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="editorTitle">
+      <button id="weaponEditorCloseBtn" class="weapon-detail-close" type="button" aria-label="关闭">×</button>
+      <div class="editor-layout">
+        <div class="editor-sidebar">
+          <h3 id="editorTitle">武器列表</h3>
+          <div class="editor-search-box">
+            <input type="text" id="editorSearch" placeholder="搜索武器..." class="editor-search-input">
+          </div>
+          <div class="editor-weapon-list" id="editorWeaponList"></div>
+        </div>
+        <div class="editor-main">
+          <div class="editor-toolbar">
+            <span id="editorWeaponCount">未选择武器</span>
+            <div class="editor-actions">
+              <button id="editorAddBtn" class="editor-action-btn primary">＋ 添加武器</button>
+              <button id="editorExportBtn" class="editor-action-btn">📤 导出</button>
+              <button id="editorImportBtn" class="editor-action-btn">📥 导入</button>
+              <button id="editorResetBtn" class="editor-action-btn danger">↺ 重置</button>
+              <button id="editorPermanentBtn" class="editor-action-btn">📦 生成永久版</button>
+              <button id="editorAmmoBtn" class="editor-action-btn">🔫 弹药管理</button>
+            </div>
+          </div>
+          <input type="file" id="editorFileInput" accept=".json" style="display:none">
+          <div class="editor-props" id="editorProps">
+            <div class="editor-empty">从左侧选择一个武器开始编辑</div>
+          </div>
+          <div class="editor-status-bar" id="editorStatusBar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="weaponDetailModal" class="weapon-detail-modal hidden">
+    <div class="weapon-detail-backdrop" data-close="weapon-detail-modal"></div>
+    <div class="weapon-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="weaponDetailTitle">
+      <button id="weaponDetailCloseBtn" class="weapon-detail-close" type="button" aria-label="关闭">×</button>
+      <div id="weaponDetailContent"></div>
+    </div>
+  </div>
+
+  <!-- <script type="module" src="./bundle.js"></script> -->
+  <script src="./bundle.js"></script>
+  <script src="./weapon_editor.js"></script>
+</body>
+
+</html>
